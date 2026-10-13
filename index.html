@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10172a">
+<title>MemoDeck — флеш-карточки</title>
+<style>
+:root{--bg:#0b1020;--panel:#151e33;--panel2:#1d2942;--text:#f5f7ff;--muted:#a6b2ca;--accent:#7c5cff;--accent2:#28c6a4;--danger:#ff647c;--border:#2a3855}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1b2850 0,#0b1020 55%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:18px}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.app{width:100%;max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;gap:10px;align-items:center}.logo{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#8b5cf6,#22d3ee);font-size:24px;box-shadow:0 8px 24px #7c5cff33}
+h1{font-size:1.25rem;margin:0}.subtitle{font-size:.82rem;color:var(--muted);margin-top:3px}
+.pill{font-size:.8rem;color:#d6fff4;background:#0d443e;border:1px solid #1e7465;padding:7px 10px;border-radius:999px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:2px 0}.tab{border:1px solid var(--border);background:#111a2d;color:var(--muted);border-radius:12px;padding:10px 14px;white-space:nowrap}.tab.active{background:var(--accent);border-color:var(--accent);color:white}
+.panel{background:linear-gradient(145deg,#18233a,#111a2c);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:0 14px 36px #0002}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.section-head h2{margin:0;font-size:1.08rem}
+.muted{color:var(--muted)}.small{font-size:.85rem}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.spread{justify-content:space-between}
+.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:650;color:white;background:#33415e;transition:transform .12s,filter .12s}.btn:active{transform:scale(.98)}.btn.primary{background:linear-gradient(135deg,#7c5cff,#5c7cfa)}.btn.good{background:#087f69}.btn.danger{background:#8e2c43}.btn.ghost{background:#202d47;border:1px solid var(--border)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#10192c;border:1px solid var(--border);border-radius:14px;padding:13px}.stat strong{display:block;font-size:1.35rem}.stat span{font-size:.78rem;color:var(--muted)}
+.progress{height:7px;border-radius:99px;background:#27334c;overflow:hidden}.progress>div{height:100%;width:0;background:linear-gradient(90deg,#8b5cf6,#22d3ee);transition:width .2s}
+.flash-wrap{perspective:1000px;min-height:290px}.flash{height:300px;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.7,.2,1);cursor:pointer}.flash.flipped{transform:rotateY(180deg)}.face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid #364768;border-radius:22px;background:radial-gradient(circle at top right,#27375b,#1b2740 62%);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:26px;box-shadow:0 18px 40px #0003}.face.back{transform:rotateY(180deg);background:radial-gradient(circle at bottom left,#263c55,#18263c 65%)}.face-label{position:absolute;left:18px;top:16px;font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#9caed0}.emoji{font-size:3.3rem;margin-bottom:14px}.front-text{font-size:clamp(1.25rem,4vw,1.65rem);font-weight:700;line-height:1.4}.back-text{font-size:clamp(1.35rem,4vw,1.8rem);font-weight:750;line-height:1.4;color:#80e6ff}.hint{display:none;margin-top:14px;color:#ffe58a;background:#3c3650;border-radius:10px;padding:9px 12px;font-size:.9rem}.hint.show{display:block}.hint-btn{margin-top:14px;background:transparent;border:1px dashed #8292b1;color:#c2cce0;padding:7px 11px;border-radius:10px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.answer{padding:14px;border-radius:13px;font-weight:700;border:1px solid}.answer.no{background:#401d2a;color:#ffb2c0;border-color:#873449}.answer.yes{background:#123d38;color:#8cf4d8;border-color:#217b6b}
+.field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}.field label{font-size:.83rem;color:var(--muted)}.field input,.field textarea,.field select{width:100%;border:1px solid #354561;background:#0e1729;color:var(--text);border-radius:11px;padding:11px 12px;outline:none}.field input:focus,.field textarea:focus,.field select:focus{border-color:#8b75ff}.field textarea{resize:vertical;min-height:74px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-grid .wide{grid-column:1/-1}
+.list{display:flex;flex-direction:column;gap:9px}.item{display:flex;align-items:center;gap:10px;background:#10192c;border:1px solid var(--border);border-radius:13px;padding:11px}.item-emoji{font-size:1.6rem}.item-main{flex:1;min-width:0}.item-main strong,.item-main span{display:block;overflow-wrap:anywhere}.item-main span{font-size:.85rem;color:var(--muted);margin-top:3px}.icon-btn{border:1px solid var(--border);border-radius:9px;background:#1e2b44;color:white;padding:8px}.empty{text-align:center;color:var(--muted);padding:28px 10px}
+.hidden{display:none!important}.footer{text-align:center;color:#8290aa;font-size:.78rem;padding:5px 0 12px}
+@media(max-width:520px){body{padding:12px}.panel{padding:14px}.stats{gap:7px}.stat{padding:10px}.flash-wrap{min-height:270px}.flash{height:270px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.answers{gap:8px}.answer{padding:12px 7px}.top{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="logo">🧠</div><div><h1>MemoDeck</h1><div class="subtitle">Запоминай фразы — шаг за шагом</div></div></div>
+    <div class="pill" id="saveStatus">● Прогресс сохраняется</div>
+  </header>
+  <nav class="tabs" aria-label="Разделы">
+    <button class="tab active" data-tab="study">📚 Учить</button>
+    <button class="tab" data-tab="cards">🗂 Мои карточки</button>
+    <button class="tab" data-tab="stats">📊 Статистика</button>
+  </nav>
+
+  <section id="view-study" class="view">
+    <div class="stats">
+      <div class="stat"><strong id="totalStat">0</strong><span>Карточек в колоде</span></div>
+      <div class="stat"><strong id="knownStat">0</strong><span>Знаю</span></div>
+      <div class="stat"><strong id="wrongStat">0</strong><span>Повторить</span></div>
+    </div>
+    <section class="panel">
+      <div class="section-head"><h2>Тренировка</h2><span class="muted small" id="counter">Карточка 1 из 52</span></div>
+      <div class="progress"><div id="progressFill"></div></div>
+      <div id="studyArea">
+        <div class="flash-wrap" style="margin-top:14px">
+          <div class="flash" id="flashCard" role="button" tabindex="0" aria-label="Перевернуть карточку">
+            <div class="face front"><span class="face-label">Русский</span><div class="emoji" id="cardEmoji">📦</div><div class="front-text" id="cardRu">Подними / возьми это.</div><button class="hint-btn" id="hintBtn">💡 Подсказка</button><div class="hint" id="hintText"></div></div>
+            <div class="face back"><span class="face-label">English</span><div class="back-text" id="cardEn">Pick it up.</div><div class="muted small" style="margin-top:18px">Нажми, чтобы вернуть</div></div>
+          </div>
+        </div>
+        <div class="answers"><button class="answer no" id="wrongBtn">❌ Не знал</button><button class="answer yes" id="rightBtn">✅ Знал</button></div>
+      </div>
+      <div id="finished" class="empty hidden"><div style="font-size:2.5rem">🎉</div><h2 style="margin:8px 0">Колода закончилась!</h2><p class="small">Можно повторить ошибки или начать заново.</p><div class="row" style="justify-content:center;margin-top:14px"><button class="btn primary" id="retryWrongBtn">🔁 Ошибки</button><button class="btn" id="restartBtn">🔀 Все карточки</button></div></div>
+    </section>
+  </section>
+
+  <section id="view-cards" class="view hidden">
+    <div class="panel">
+      <div class="section-head"><h2 id="formTitle">➕ Создать карточку</h2><button class="btn ghost small" id="cancelEditBtn" hidden>Отмена</button></div>
+      <form id="cardForm">
+        <div class="form-grid">
+          <div class="field"><label for="ruInput">Фраза на русском *</label><textarea id="ruInput" required maxlength="500" placeholder="Например: Положи это на стол"></textarea></div>
+          <div class="field"><label for="enInput">Фраза на английском *</label><textarea id="enInput" required maxlength="500" placeholder="Put it on the table."></textarea></div>
+          <div class="field"><label for="hintInput">Подсказка / ключевые слова</label><input id="hintInput" maxlength="200" placeholder="put down"></div>
+          <div class="field"><label for="emojiInput">Эмодзи</label><input id="emojiInput" maxlength="12" value="📝" placeholder="📦"></div>
+          <div class="field wide"><button class="btn primary" type="submit" id="saveCardBtn">Сохранить карточку</button></div>
+        </div>
+      </form>
+    </div>
+    <div class="panel">
+      <div class="section-head"><h2>Моя колода</h2><div class="row"><button class="btn ghost" id="exportBtn">Экспорт JSON</button><button class="btn ghost" id="importBtn">Импорт JSON</button><input type="file" id="importFile" accept=".json,application/json" class="hidden"></div></div>
+      <p class="muted small" style="margin-bottom:12px">Карточки и прогресс сохраняются на этом устройстве в браузере. Экспортируй резервную копию, если не хочешь потерять данные.</p>
+      <div class="field" style="margin-bottom:12px"><label for="searchInput">Поиск по карточкам</label><input id="searchInput" placeholder="Начни вводить текст…"></div>
+      <div id="cardList" class="list"></div>
+    </div>
+  </section>
+
+  <section id="view-stats" class="view hidden">
+    <div class="panel">
+      <div class="section-head"><h2>📊 Статистика</h2><button class="btn ghost" id="resetStatsBtn">Сбросить прогресс</button></div>
+      <div class="stats">
+        <div class="stat"><strong id="statTotal">0</strong><span>Всего карточек</span></div>
+        <div class="stat"><strong id="statSeen">0</strong><span>Изучено ответов</span></div>
+        <div class="stat"><strong id="statAccuracy">0%</strong><span>Доля правильных ответов</span></div>
+      </div>
+      <div style="margin-top:18px"><div class="row spread"><span class="muted small">Правильные ответы</span><strong id="statRight">0</strong></div><div class="progress" style="margin-top:7px"><div id="rightProgress"></div></div></div>
+      <div style="margin-top:16px"><div class="row spread"><span class="muted small">Ошибки</span><strong id="statWrong">0</strong></div><div class="progress" style="margin-top:7px"><div id="wrongProgress" style="background:linear-gradient(90deg,#ff647c,#ff9b72)"></div></div></div>
+      <p class="muted small" style="margin-top:18px">Статистика хранится локально в этом браузере. Она не синхронизируется автоматически между разными устройствами.</p>
+    </div>
+  </section>
+  <footer class="footer">MemoDeck · твои карточки, твой темп</footer>
+</div>
+<script>
+'use strict';
+const DEFAULT_CARDS = [
+{ru:"Подними / возьми это.",en:"Pick it up.",hint:"Pick up",emoji:"📦"},
+{ru:"Положи / поставь это на стол.",en:"Put it down on the table.",hint:"Put down",emoji:"🛋️"},
+{ru:"Отодвинь это в сторону.",en:"Move it aside.",hint:"Move aside",emoji:"➡️"},
+{ru:"Передвинь / переставь это сюда.",en:"Move it over here.",hint:"Move over here",emoji:"📍"},
+{ru:"Положи это внутрь.",en:"Put it in.",hint:"Put in",emoji:"📥"},
+{ru:"Достань / вынь это.",en:"Take it out.",hint:"Take out",emoji:"📤"},
+{ru:"Дай это мне.",en:"Give it to me.",hint:"Give to me",emoji:"🤲"},
+{ru:"Подними это вверх.",en:"Lift it up.",hint:"Lift up",emoji:"⬆️"},
+{ru:"Медленно опусти это.",en:"Lower it slowly.",hint:"Lower slowly",emoji:"⬇️"},
+{ru:"Слегка наклони это.",en:"Tilt it slightly.",hint:"Tilt slightly",emoji:"📐"},
+{ru:"Держи это вертикально.",en:"Keep it upright.",hint:"Keep upright",emoji:"📏"},
+{ru:"Поднеси это ближе.",en:"Bring it closer.",hint:"Bring closer",emoji:"🔍"},
+{ru:"Отодвинь / отнеси это дальше.",en:"Move it farther away.",hint:"Move farther away",emoji:"🔭"},
+{ru:"Разверни / поверни это.",en:"Turn it around.",hint:"Turn around",emoji:"🔄"},
+{ru:"Хорошенько встряхни это.",en:"Give it a good shake.",hint:"Give a good shake",emoji:"🫨"},
+{ru:"Осторожно! Не урони это.",en:"Be careful! Don’t drop it.",hint:"Don't drop",emoji:"⚠️"},
+{ru:"Неси это осторожно.",en:"Carry it carefully.",hint:"Carry carefully",emoji:"🚶"},
+{ru:"Аккуратно положи / поставь это.",en:"Set it down gently.",hint:"Set down gently",emoji:"🪶"},
+{ru:"Переверни это вверх дном.",en:"Turn it upside down.",hint:"Turn upside down",emoji:"🙃"},
+{ru:"Оставь это там.",en:"Leave it there.",hint:"Leave there",emoji:"🛑"},
+{ru:"Подними / возьми телефон.",en:"Pick up the phone.",hint:"Pick up",emoji:"📱"},
+{ru:"Поставь чашку на стол.",en:"Put the cup down on the table.",hint:"Put down",emoji:"☕"},
+{ru:"Отодвинь книгу в сторону.",en:"Move the book aside.",hint:"Move aside",emoji:"📖"},
+{ru:"Передвинь коробку сюда.",en:"Move the box over here.",hint:"Move over here",emoji:"📦"},
+{ru:"Положи ключ в карман.",en:"Put the key in your pocket.",hint:"Put in pocket",emoji:"🔑"},
+{ru:"Достань ключ из кармана.",en:"Take the key out of your pocket.",hint:"Take out of pocket",emoji:"🗝️"},
+{ru:"Дай мне ручку.",en:"Give me the pen.",hint:"Give me",emoji:"🖊️"},
+{ru:"Подними коробку вверх.",en:"Lift the box up.",hint:"Lift up",emoji:"📦"},
+{ru:"Медленно опусти коробку.",en:"Lower the box slowly.",hint:"Lower slowly",emoji:"📦"},
+{ru:"Слегка наклони бутылку.",en:"Tilt the bottle slightly.",hint:"Tilt slightly",emoji:"🍾"},
+{ru:"Держи бутылку вертикально.",en:"Keep the bottle upright.",hint:"Keep upright",emoji:"🍾"},
+{ru:"Поднеси телефон ближе.",en:"Bring the phone closer.",hint:"Bring closer",emoji:"📱"},
+{ru:"Отодвинь телефон подальше.",en:"Move the phone farther away.",hint:"Move farther away",emoji:"📱"},
+{ru:"Разверни телефон.",en:"Turn the phone around.",hint:"Turn around",emoji:"📱"},
+{ru:"Хорошенько встряхни бутылку.",en:"Give the bottle a good shake.",hint:"Give a good shake",emoji:"🍾"},
+{ru:"Осторожно! Не урони стакан.",en:"Be careful! Don’t drop the glass.",hint:"Don't drop glass",emoji:"🥛"},
+{ru:"Неси ноутбук осторожно.",en:"Carry the laptop carefully.",hint:"Carry carefully",emoji:"💻"},
+{ru:"Аккуратно поставь тарелку.",en:"Set the plate down gently.",hint:"Set down gently",emoji:"🍽️"},
+{ru:"Переверни чашку вверх дном.",en:"Turn the cup upside down.",hint:"Turn upside down",emoji:"☕"},
+{ru:"Оставь ключи там.",en:"Leave the keys there.",hint:"Leave there",emoji:"🔑"},
+{ru:"Поставь чашку в шкаф.",en:"Put the cup in the cabinet.",hint:"Put in cabinet",emoji:"🗄️"},
+{ru:"Достань её из шкафа.",en:"Take it out of the cabinet.",hint:"Take out of cabinet",emoji:"🗄️"},
+{ru:"Держи чашку за ручку.",en:"Hold the cup by the handle.",hint:"Hold by handle",emoji:"☕"},
+{ru:"Не пролей напиток.",en:"Don’t spill the drink.",hint:"Don't spill",emoji:"🥤"},
+{ru:"Держи чашку неподвижно.",en:"Keep the cup steady.",hint:"Keep steady",emoji:"☕"},
+{ru:"Посмотри на чашку.",en:"Look at the cup.",hint:"Look at",emoji:"👀"},
+{ru:"Проверь, чистая ли она.",en:"Check if it’s clean.",hint:"Check if clean",emoji:"✨"},
+{ru:"Налей немного воды в чашку.",en:"Pour some water into the cup.",hint:"Pour into",emoji:"🫗"},
+{ru:"Добавь немного сахара.",en:"Add some sugar.",hint:"Add sugar",emoji:"🍬"},
+{ru:"Размешай напиток.",en:"Stir the drink.",hint:"Stir drink",emoji:"🥄"},
+{ru:"Поднеси чашку к губам.",en:"Bring the cup to your lips.",hint:"Bring to lips",emoji:"👄"},
+{ru:"Сделай глоток.",en:"Take a sip.",hint:"Take a sip",emoji:"☕"},
+{ru:"Помой чашку.",en:"Wash the cup.",hint:"Wash cup",emoji:"🧽"}
+];
+const STORAGE_KEY='memodeck.v3.data';
+function freshData(){return {cards:DEFAULT_CARDS.map((c,i)=>({...c,id:'default-'+i,custom:false})),results:{},totals:{right:0,wrong:0,seen:0},wrongIds:[]};}
+function loadData(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return freshData();const d=JSON.parse(raw);if(!d||!Array.isArray(d.cards))return freshData();return {cards:d.cards.filter(c=>c&&typeof c.ru==='string'&&typeof c.en==='string').map((c,i)=>({id:String(c.id||('card-'+i)),ru:c.ru,en:c.en,hint:c.hint||'',emoji:c.emoji||'📝',custom:!!c.custom})),results:d.results&&typeof d.results==='object'?d.results:{},totals:{right:Number(d.totals?.right)||0,wrong:Number(d.totals?.wrong)||0,seen:Number(d.totals?.seen)||0},wrongIds:Array.isArray(d.wrongIds)?d.wrongIds:[]};}catch(e){return freshData();}}
+let data=loadData(), deck=[], index=0, sessionWrong=[], sessionRight=0, flipped=false, hintVisible=false, editingId=null;
+const $=id=>document.getElementById(id);
+function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));$('saveStatus').textContent='● Сохранено';}catch(e){$('saveStatus').textContent='● Не удалось сохранить';}}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$('view-'+tab).classList.remove('hidden');if(tab==='cards')renderList();if(tab==='stats')renderStats();}
+function startDeck(cards=data.cards){deck=shuffle(cards);index=0;sessionWrong=[];sessionRight=0;flipped=false;$('finished').classList.add('hidden');$('studyArea').classList.remove('hidden');renderCard();renderTopStats();}
+function renderCard(){if(!deck.length){$('studyArea').classList.add('hidden');$('finished').classList.remove('hidden');$('counter').textContent='Нет карточек';$('progressFill').style.width='100%';$('retryWrongBtn').disabled=!data.wrongIds.length;return;}if(index>=deck.length){$('studyArea').classList.add('hidden');$('finished').classList.remove('hidden');$('counter').textContent=`Завершено: ${deck.length}`;$('progressFill').style.width='100%';$('retryWrongBtn').disabled=!sessionWrong.length;return;}const c=deck[index];flipped=false;hintVisible=false;$('flashCard').classList.remove('flipped');$('cardEmoji').textContent=c.emoji||'📝';$('cardRu').textContent=c.ru;$('cardEn').textContent=c.en;$('hintText').textContent=c.hint||'Подсказка не добавлена';$('hintText').classList.remove('show');$('hintBtn').textContent='💡 Подсказка';$('counter').textContent=`Карточка ${index+1} из ${deck.length}`;$('progressFill').style.width=(index/deck.length*100)+'%';}
+function renderTopStats(){$('totalStat').textContent=data.cards.length;$('knownStat').textContent=data.totals.right;$('wrongStat').textContent=data.totals.wrong;}
+function answer(correct){if(index>=deck.length)return;const c=deck[index];data.totals.seen++;if(correct){sessionRight++;data.totals.right++;data.results[c.id]=(data.results[c.id]||0)+1;data.wrongIds=data.wrongIds.filter(id=>id!==c.id);}else{sessionWrong.push(c);data.totals.wrong++;data.wrongIds=[...new Set([...data.wrongIds,c.id])];}saveData();index++;renderCard();renderTopStats();}
+function flip(){flipped=!flipped;$('flashCard').classList.toggle('flipped',flipped);}
+function renderList(){const query=$('searchInput').value.trim().toLowerCase();const list=$('cardList');list.replaceChildren();const cards=data.cards.filter(c=>(c.ru+' '+c.en+' '+c.hint).toLowerCase().includes(query));if(!cards.length){list.innerHTML='<div class="empty">Карточек не найдено.</div>';return;}for(const c of cards){const item=document.createElement('div');item.className='item';const em=document.createElement('div');em.className='item-emoji';em.textContent=c.emoji||'📝';const main=document.createElement('div');main.className='item-main';const ru=document.createElement('strong');ru.textContent=c.ru;const en=document.createElement('span');en.textContent=c.en;main.append(ru,en);const edit=document.createElement('button');edit.className='icon-btn';edit.textContent='✏️';edit.title='Редактировать';edit.setAttribute('aria-label','Редактировать карточку');edit.addEventListener('click',()=>editCard(c.id));const del=document.createElement('button');del.className='icon-btn';del.textContent='🗑️';del.title='Удалить';del.setAttribute('aria-label','Удалить карточку');del.addEventListener('click',()=>deleteCard(c.id));item.append(em,main,edit,del);list.append(item);}}
+function clearForm(){editingId=null;$('cardForm').reset();$('emojiInput').value='📝';$('formTitle').textContent='➕ Создать карточку';$('saveCardBtn').textContent='Сохранить карточку';$('cancelEditBtn').hidden=true;}
+function editCard(id){const c=data.cards.find(x=>x.id===id);if(!c)return;editingId=id;$('ruInput').value=c.ru;$('enInput').value=c.en;$('hintInput').value=c.hint||'';$('emojiInput').value=c.emoji||'📝';$('formTitle').textContent='✏️ Редактировать карточку';$('saveCardBtn').textContent='Сохранить изменения';$('cancelEditBtn').hidden=false;$('ruInput').focus();window.scrollTo({top:0,behavior:'smooth'});}
+function deleteCard(id){const c=data.cards.find(x=>x.id===id);if(!c)return;if(!confirm('Удалить карточку «'+c.ru+'»?'))return;data.cards=data.cards.filter(x=>x.id!==id);delete data.results[id];data.wrongIds=data.wrongIds.filter(x=>x!==id);saveData();renderList();renderTopStats();if(index>=deck.length)renderCard();}
+$('cardForm').addEventListener('submit',e=>{e.preventDefault();const ru=$('ruInput').value.trim(),en=$('enInput').value.trim();if(!ru||!en)return;const c={id:editingId||('custom-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),ru,en,hint:$('hintInput').value.trim(),emoji:$('emojiInput').value.trim()||'📝',custom:true};if(editingId){const i=data.cards.findIndex(x=>x.id===editingId);if(i>=0)data.cards[i]=c;}else data.cards.push(c);saveData();clearForm();renderList();renderTopStats();startDeck(data.cards);setTab('cards');});
+$('cancelEditBtn').addEventListener('click',clearForm);
+$('searchInput').addEventListener('input',renderList);
+$('flashCard').addEventListener('click',flip);
+$('flashCard').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}});
+$('hintBtn').addEventListener('click',e=>{e.stopPropagation();hintVisible=!hintVisible;$('hintText').classList.toggle('show',hintVisible);$('hintBtn').textContent=hintVisible?'🙈 Скрыть подсказку':'💡 Подсказка';});
+$('wrongBtn').addEventListener('click',()=>answer(false));$('rightBtn').addEventListener('click',()=>answer(true));
+$('retryWrongBtn').addEventListener('click',()=>{const wrong=data.cards.filter(c=>data.wrongIds.includes(c.id));startDeck(wrong);});
+$('restartBtn').addEventListener('click',()=>startDeck(data.cards));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+$('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='memodeck-backup.json';a.click();URL.revokeObjectURL(url);});
+$('importBtn').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const obj=JSON.parse(await file.text());if(!obj||!Array.isArray(obj.cards))throw new Error('bad file');const cards=obj.cards.filter(c=>c&&typeof c.ru==='string'&&typeof c.en==='string').map((c,i)=>({id:String(c.id||('import-'+Date.now()+'-'+i)),ru:c.ru.trim(),en:c.en.trim(),hint:String(c.hint||''),emoji:String(c.emoji||'📝'),custom:c.custom!==false})).filter(c=>c.ru&&c.en);if(!cards.length)throw new Error('empty');if(!confirm(`Импортировать ${cards.length} карточек? Текущая колода будет заменена.`))return;data={cards,results:obj.results&&typeof obj.results==='object'?obj.results:{},totals:{right:Number(obj.totals?.right)||0,wrong:Number(obj.totals?.wrong)||0,seen:Number(obj.totals?.seen)||0},wrongIds:Array.isArray(obj.wrongIds)?obj.wrongIds:[]};saveData();renderList();renderTopStats();startDeck(data.cards);alert('Импорт завершён.');}catch(err){alert('Не удалось импортировать файл. Выбери JSON-резервную копию MemoDeck.');}finally{$('importFile').value='';}});
+$('resetStatsBtn').addEventListener('click',()=>{if(!confirm('Сбросить статистику и список карточек для повторения? Сами карточки останутся.'))return;data.totals={right:0,wrong:0,seen:0};data.results={};data.wrongIds=[];saveData();renderStats();renderTopStats();});
+function renderStats(){const t=data.totals;$('statTotal').textContent=data.cards.length;$('statSeen').textContent=t.seen;$('statRight').textContent=t.right;$('statWrong').textContent=t.wrong;$('statAccuracy').textContent=t.seen?Math.round(t.right/t.seen*100)+'%':'0%';$('rightProgress').style.width=t.seen?(t.right/t.seen*100)+'%':'0%';$('wrongProgress').style.width=t.seen?(t.wrong/t.seen*100)+'%':'0%';}
+startDeck(data.cards);renderList();renderStats();
+</script>
+</body>
+</html>
